@@ -15,16 +15,13 @@
 (function(jQuery) {
     'use strict';
 
-    var modalVersion,
-        Constructor;
+    var modalVersion;
 
     if (jQuery.fn.modal) {
         if (jQuery.fn.modal.Modal) {
             modalVersion = 1;
-            Constructor = jQuery.fn.modal.Modal;
         } else if (jQuery.fn.modal.Constructor) {
             modalVersion = 2;
-            Constructor = jQuery.fn.modal.Constructor;
         }
     }
     else {

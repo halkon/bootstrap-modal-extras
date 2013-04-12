@@ -1,27 +1,105 @@
 /***
- *
- */
+
+    Extra functionality to be appended to the Modal object provided from bootstrap:
+
+    overlay: Create an overlay pane on top of the body section, with a message if desired
+    remove_overlay: Remove the created overlay
+    center:  the Modal (in case window resizes)
+    height: Sets the height of the Modal
+    resize: Resizes the Modal (width, height)
+    resize_to_contents: Resizes the Modal to the size of the contents in the modal body 
+    maximize: Maximizes the Modal window (horizontally, vertically) to the viewport sizes (default: both)
+
+ ***/
 
 (function(jQuery) {
     'use strict';
+
+    var modalVersion,
+        Constructor;
+
+    if (jQuery.fn.modal) {
+        if (jQuery.fn.modal.Modal) {
+            modalVersion = 1;
+            Constructor = jQuery.fn.modal.Modal;
+        } else if (jQuery.fn.modal.Constructor) {
+            modalVersion = 2;
+            Constructor = jQuery.fn.modal.Constructor;
+        }
+    }
+    else {
+        throw 'Bootstrap Modal not loaded';
+    }
+
+    //Utility functions
+    var bind = function(fn, scope) {
+        var index = 2;
+        var origArgs = Array.prototype.slice.call(arguments, index);
+
+        return function() {
+            var context = scope || this,
+                args    = Array.prototype.slice.call(arguments);
+
+            args = origArgs.concat(args);
+            fn.apply(context, args);
+        };
+    };
+
+    var fnTimeout = function(fn, time) {
+        var args = Array.prototype.slice.call(arguments, 2);
+        return setTimeout(function() {
+            return fn.apply(null, params);
+        }, time);
+    };
+
+    var fnCallStack = function(fn) {
+    };
+
+    var checkBoolean = function(val) {
+        return val === true || val === false;
+    };
+
+    var throttle = function throttle(fn, threshhold, scope) {
+        // From http://remysharp.com/2010/07/21/throttling-function-calls/#comment-216435
+        var threshold = (typeof threshhold !== 'undefined') ? threshold : 250;
+        var last,
+            deferTimer;
+        return function() {
+            var context = scope || this;
+
+            var now = +new Date(),
+                args = arguments;
+            if (last && now < last + threshhold) {
+                // hold on to it
+                clearTimeout(deferTimer);
+                deferTimer = setTimeout(function() {
+                    last = now;
+                    fn.apply(context, args);
+                }, threshhold);
+            } else {
+                last = now;
+                fn.apply(context, args);
+            }
+        };
+    };
+
+
     var ext = {
+
         getBody: function() {
-            if(!this.$elementBody)
-            {
+            if (!this.$elementBody) {
                 this.$elementBody = this.$element.find('.modal-body');
             }
             return this.$elementBody;
         },
         getHeader: function() {
-            if(!this.$elementHeader)
-            {
+            if (!this.$elementHeader) {
                 this.$elementHeader = this.$element.find('.modal-header');
             }
             return this.$elementHeader;
         },
         getFooter: function() {
-            if(!this.$elementFooter)
-            {
+            if (!this.$elementFooter) {
                 this.$elementFooter = this.$element.find('.modal-footer');
             }
             return this.$elementFooter;
@@ -31,16 +109,14 @@
             var message = arguments[0] || '';
             var bodyEl = jQuery(this.getBody());
 
-            bodyEl
-                .css('position', 'relative')
+            bodyEl.css('position', 'relative')
                 .css('overflow', 'hidden')
                 .scrollTop(0);
-    
+
             //Create Overlay
             var overlay = jQuery(bodyEl.clone().html(''));
 
-            overlay
-                .appendTo(bodyEl)
+            overlay.appendTo(bodyEl)
                 .attr('class', null)
                 .attr('style', null)
                 .width(bodyEl.outerWidth())
@@ -56,7 +132,6 @@
             this.getBody().find('.modal-backdrop').remove();
             this.getBody().css('overflow', 'auto');
         },
-
         center: function() {
             this.$element.css('margin-top', -1 * (this.$element.outerHeight() / 2));
             this.$element.css('margin-left', -1 * (this.$element.outerWidth() / 2));
@@ -67,7 +142,6 @@
                 .css('max-height', height + 'px')
                 .css('height', height + 'px');
             this.center();
-
         },
         resize: function() {
             var width = arguments[0] || false;
@@ -85,7 +159,7 @@
             if (height) {
                 var padding = 0;
                 if (this.$element.css('box-sizing') == 'content-box') {
-                    padding =  parseInt(header.outerHeight(true), 10) - parseInt(header.height(), 10);
+                    padding = parseInt(header.outerHeight(true), 10) - parseInt(header.height(), 10);
                     padding += parseInt(footer.outerHeight(true), 10) - parseInt(footer.height(), 10);
                     padding -= parseInt(body.css('padding').replace(/[^0-9]/g, ''), 10);
                 }
@@ -103,7 +177,7 @@
             this.maximize(false);
             var maxWidth = 0;
             var padding = 0;
-            $.each(this.$element.find('.modal-body > * > *').andSelf(), function(idx, child) {
+            jQuery.each(this.$element.find('.modal-body > * > *').andSelf(), function(idx, child) {
                 padding += child.padding;
                 if (jQuery(child).outerWidth(true) > maxWidth) {
                     maxWidth = jQuery(child).outerWidth(true);
@@ -124,12 +198,19 @@
             var maxHeight = jQuery(window).height() - 40;
 
             if (arguments.length > 0) {
-                if (_.isBoolean(arguments[0])) {
+                if (checkBoolean(arguments[0])) {
                     width = arguments[0];
                 }
-                if (_.isBoolean(arguments[1])) {
+                if (checkBoolean(arguments[1])) {
                     height = arguments[1];
                 }
+            }
+
+            if(!this.boundResize)
+            {
+                var resize = throttle(bind(this.resizeFn, this, width, height), 50);
+                jQuery(window).bind('resize', resize);
+                this.boundResize = true;
             }
 
             if (width === true) {
@@ -140,22 +221,20 @@
             }
             this.resize(width, height);
             body.css('overflow', 'auto');
-            var resize = _.throttle(_.bind(function() {
-                if (!_.isUndefined(this.$element)) {
-                    this.maximize(width, height);
-                }
-            }, this), 750);
-            jQuery(window).bind('resize', resize);
-
             this.center();
+        },
+        resizeFn: function(width, height) {
+            if (typeof this.$element !== 'undefined' && this.$element.length === 1 && this.$element.is(':visible')) {
+                this.maximize(width, height);
+            }
         }
     };
 
-    if (jQuery.fn.modal) {
-        if (jQuery.fn.modal.Modal) {
-            $.extend(jQuery.fn.modal.Modal.prototype, modalConf);
-        } else if (jQuery.fn.modal.Constructor) {
-            $.extend(jQuery.fn.modal.Constructor.prototype, modalConf);
-        }
+
+    if(modalVersion === 1) {
+        jQuery.extend(jQuery.fn.modal.Modal.prototype, ext);
+    }
+    else if (modalVersion === 2) {
+        jQuery.extend(jQuery.fn.modal.Constructor.prototype, ext);
     }
 }(window.jQuery));

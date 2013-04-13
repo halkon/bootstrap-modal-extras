@@ -82,6 +82,7 @@
 
 
     var ext = {
+        version: modalVersion,
 
         getBody: function() {
             if (!this.$elementBody) {
@@ -130,7 +131,20 @@
             this.getBody().css('overflow', 'auto');
         },
         center: function() {
-            this.$element.css('margin-top', -1 * (this.$element.outerHeight() / 2));
+            var winHeight = jQuery(window).height();
+            var modHeight = this.$element.outerHeight();
+            var topDiff = 0;
+            if(this.version === 1 )
+            {
+                topDiff = modHeight/2;
+            }
+            else
+            {
+                var top = parseInt(this.$element.css('top').replace(/[^0-9]+/g, ''), 10);
+                topDiff = top-((winHeight-modHeight)/2);
+            }
+
+            this.$element.css('margin-top', -1 * (topDiff));
             this.$element.css('margin-left', -1 * (this.$element.outerWidth() / 2));
         },
         height: function(height) {

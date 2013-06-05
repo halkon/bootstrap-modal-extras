@@ -119,15 +119,13 @@
                 .attr('style', null)
                 .width(bodyEl.outerWidth())
                 .height(bodyEl.outerHeight())
-                .addClass('modal-validating')
-                .addClass('modal-backdrop')
-                .addClass('element-overlay')
+                .addClass('modal-overlay')
                 .css('position', 'absolute')
                 .html('<p>{}...</p>'.format(message));
             return this;
         },
         remove_overlay: function() {
-            this.getBody().find('.modal-backdrop').remove();
+            this.getBody().find('.modal-overlay').remove();
             this.getBody().css('overflow', 'auto');
         },
         center: function() {
@@ -140,7 +138,7 @@
             }
             else
             {
-                var top = parseInt(this.$element.css('top').replace(/[^0-9]+/g, ''), 10);
+                var top = parseInt(this.$element.css('top').replace(/[^0-9.]+/g, ''), 10);
                 topDiff = top-((winHeight-modHeight)/2);
             }
 

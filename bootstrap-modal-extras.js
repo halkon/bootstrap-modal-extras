@@ -121,11 +121,13 @@
                 .height(bodyEl.outerHeight())
                 .addClass('modal-overlay')
                 .css('position', 'absolute')
-                .html('<p>{}...</p>'.format(message));
+                .html('<p>'+message+'...</p>');
+            this.$overlay = overlay;
             return this;
         },
         remove_overlay: function() {
-            this.getBody().find('.modal-overlay').remove();
+            this.$overlay.remove();
+            this.$overlay = undefined;
             this.getBody().css('overflow', 'auto');
         },
         center: function() {

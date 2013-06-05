@@ -126,8 +126,10 @@
             return this;
         },
         remove_overlay: function() {
-            this.$overlay.remove();
-            this.$overlay = undefined;
+            if(this.$overlay) {
+                this.$overlay.remove();
+                this.$overlay = undefined;
+            }
             this.getBody().css('overflow', 'auto');
         },
         center: function() {

@@ -121,7 +121,7 @@
                 .height(bodyEl.outerHeight())
                 .addClass('modal-overlay')
                 .css('position', 'absolute')
-                .html('<p>'+message+'...</p>');
+                .html('<div class="overlay-content"><p>'+message+'...</p></div>');
             this.$overlay = overlay;
             return this;
         },
@@ -167,7 +167,10 @@
             this.$element.css('overflow', 'visible');
 
             if (width) {
-                this.$element.width(width).css('max-width', width + 'px');
+                if(String(width).indexOf('%') === -1) {
+                    width = width + 'px';
+                }
+                this.$element.width(width).css('max-width', width);
             }
             if (height) {
                 var padding = 0;

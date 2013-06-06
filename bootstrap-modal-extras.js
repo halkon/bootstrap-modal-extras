@@ -113,15 +113,21 @@
 
             //Create Overlay
             var overlay = jQuery(bodyEl.clone().html(''));
+            var width = bodyEl.outerWidth();
+            var height = bodyEl.outerHeight();
+
+            var content = jQuery('<div class="overlay-content"><p>'+message+'...</p></div>');
+            content
+                .width(width)
+                .height(height);
 
             overlay.appendTo(bodyEl)
                 .attr('class', null)
                 .attr('style', null)
-                .width(bodyEl.outerWidth())
-                .height(bodyEl.outerHeight())
                 .addClass('modal-overlay')
-                .css('position', 'absolute')
-                .html('<div class="overlay-content"><p>'+message+'...</p></div>');
+                .width(width)
+                .height(height)
+                .append(content);
             this.$overlay = overlay;
             return this;
         },

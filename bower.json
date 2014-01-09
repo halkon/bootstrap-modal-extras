@@ -1,0 +1,15 @@
+{
+  "name": "halkon/bootstrap-modal-extras",
+  "version": "0.0.2",
+  "main": "",
+  "description": "Extra functions for bootstrap modals (Resize/Center/...)",
+  "license": "Eclipse",
+  "ignore": [
+    ".jshintrc",
+    "**/*.txt"
+  ],
+  "dependencies": {
+    "bootstrap": "1.X/2.X"
+  }
+}
+

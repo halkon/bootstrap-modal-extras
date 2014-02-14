@@ -29,56 +29,52 @@
     }
 
     //Utility functions
-    var bind = function(fn, scope) {
-        var index = 2;
-        var origArgs = Array.prototype.slice.call(arguments, index);
+    var bind = function bind(fn, scope) {
+            var index = 2;
+            var origArgs = Array.prototype.slice.call(arguments, index);
 
-        return function() {
-            var context = scope || this,
-                args    = Array.prototype.slice.call(arguments);
+            return function () {
+                var context = scope || this,
+                    args    = Array.prototype.slice.call(arguments);
 
-            args = origArgs.concat(args);
-            fn.apply(context, args);
-        };
-    };
+                args = origArgs.concat(args);
+                fn.apply(context, args);
+            };
+        },
+        fnTimeout = function fnTimeout(fn, time) {
+            var args = Array.prototype.slice.call(arguments, 2);
+            return setTimeout(function () {
+                return fn.apply(null, params);
+            }, time);
+        },
+        fnCallStack = function fnCallStack(fn) {
+        },
+        checkBoolean = function checkBoolean(val) {
+            return val === true || val === false;
+        },
+        throttle = function throttle(fn, threshhold, scope) {
+            // From http://remysharp.com/2010/07/21/throttling-function-calls/#comment-216435
+            var threshold = (typeof threshhold !== 'undefined') ? threshold : 250;
+            var last,
+                deferTimer;
+            return function () {
+                var context = scope || this;
 
-    var fnTimeout = function(fn, time) {
-        var args = Array.prototype.slice.call(arguments, 2);
-        return setTimeout(function() {
-            return fn.apply(null, params);
-        }, time);
-    };
-
-    var fnCallStack = function(fn) {
-    };
-
-    var checkBoolean = function(val) {
-        return val === true || val === false;
-    };
-
-    var throttle = function throttle(fn, threshhold, scope) {
-        // From http://remysharp.com/2010/07/21/throttling-function-calls/#comment-216435
-        var threshold = (typeof threshhold !== 'undefined') ? threshold : 250;
-        var last,
-            deferTimer;
-        return function() {
-            var context = scope || this;
-
-            var now = +new Date(),
-                args = arguments;
-            if (last && now < last + threshhold) {
-                // hold on to it
-                clearTimeout(deferTimer);
-                deferTimer = setTimeout(function() {
+                var now = +new Date(),
+                    args = arguments;
+                if (last && now < last + threshhold) {
+                    // hold on to it
+                    clearTimeout(deferTimer);
+                    deferTimer = setTimeout(function() {
+                        last = now;
+                        fn.apply(context, args);
+                    }, threshhold);
+                } else {
                     last = now;
                     fn.apply(context, args);
-                }, threshhold);
-            } else {
-                last = now;
-                fn.apply(context, args);
-            }
+                }
+            };
         };
-    };
 
 
     var ext = {
@@ -139,16 +135,15 @@
             this.getBody().css('overflow', 'auto');
         },
         center: function() {
-            var winHeight = jQuery(window).height();
-            var modHeight = this.$element.outerHeight();
-            var topDiff = 0;
-            if(this.version === 1 )
-            {
+            var winHeight = jQuery(window).height(),
+                modHeight = this.$element.outerHeight(),
+                topDiff = 0,
+                top;
+
+            if(this.version === 1 ) {
                 topDiff = modHeight/2;
-            }
-            else
-            {
-                var top = parseInt(this.$element.css('top').replace(/[^0-9.]+/g, ''), 10);
+            } else {
+                top = parseInt(this.$element.css('top').replace(/[^0-9.]+/g, ''), 10);
                 topDiff = top-((winHeight-modHeight)/2);
             }
 
@@ -185,15 +180,20 @@
                     padding += parseInt(footer.outerHeight(true), 10) - parseInt(footer.height(), 10);
                     padding -= parseInt(body.css('padding').replace(/[^0-9]/g, ''), 10);
                 }
-                this.$element.height(height).css('max-height', height + 'px');
-
-                var headerHeight = parseInt(header.outerHeight(true), 10);
-                var footerHeight = parseInt(footer.outerHeight(true), 10);
-
+                
+                var headerHeight = header.height(),
+                    footerHeight = footer.height();
+                if(headerHeight === 0) {
+                    headerHeight = header.outerHeight();
+                }
+                if(footerHeight === 0) {
+                    footerHeight = footer.outerHeight();
+                }
                 var maxBodyHeight = height - headerHeight - footerHeight - padding;
+                this.$element.height(height).css('max-height', height + 'px');
                 body.height(maxBodyHeight).css('max-height', (maxBodyHeight) + 'px');
             }
-            this.center();
+            this.$element.trigger('resize', width, height, maxBodyHeight)
         },
         resize_to_contents: function() {
             this.maximize(false);

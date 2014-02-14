@@ -9,7 +9,7 @@
     "**/*.txt"
   ],
   "dependencies": {
-    "bootstrap": "1.X/2.X"
+    "bootstrap": "<3"
   }
 }
 
